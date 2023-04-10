@@ -1,0 +1,1 @@
+CNN_Predict(image_file)

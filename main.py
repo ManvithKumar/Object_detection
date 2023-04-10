@@ -5,13 +5,17 @@ from tensorflow.keras import datasets,layers, models
 
 
 def CNN_Predict(img):
+
+    img = cv.resize(img, (32,32),interpolation = cv.INTER_LINEAR)
+
     (training_images,training_labels) ,(testing_images,testing_labels) = datasets.cifar10.load_data()
     training_images, testing_images = training_images /255 ,testing_images /255
 
-    class_names = ['Paper','Stone','Metal','Pencil','Pen','Cloth']
-    de_gradlist=[]
-    non_de_gradlist =[]
-    metal_list=[]
+    class_names = ['Paper','Stone','Metal','Pencil','Pen','Cloth','Mobile','Wallet','Eraser','Scale','Coin'
+                   'Scissors','Plastic','Steel Bottle','Apple']
+    de_gradlist=['Paper','Stone','Cloth','Pencil','Apple']
+    non_de_gradlist =['Pen','Wallet','Eraser','Scale','Plastic']
+    metal_list=['Metal','Coin','Steel Bottle','Mobile']
 
     # for i in range(16):
     #     plt.subplot(4,4,i+1)
@@ -44,29 +48,35 @@ def CNN_Predict(img):
     print(f"accuracy :{accuracy}")
 
     model.save('waste_classifier.model')
-
-    img = cv.imread('pen.jpg')
     img  = cv.cvtColor(img,cv.COLOR_BGR2RGB)
 
     plt.imshow(img,cmap=plt.cm.binary)
     prediction = model.predict(np.array([img])/255)
     index = np.argmax(prediction)
-    print(prediction[index])
+    pred_img = class_names[prediction[index]]
+    if pred_img in de_gradlist:
+        print("Degradle Object Found!")
+    elif pred_img  in non_de_gradlist:
+        print("Non Degradle Object Found!")
+    else:
+        print("Metallic Object Found!")
 
 
 
 img = cv.VideoCapture(0)
 img_counter = 0
 while(True):
-
     ret, frame = img.read()
+
     cv.imshow('frame', frame)
-    if key%255 == 27:
+    k = cv.waitKey(1)
+    if k%256 == 27:
         img_name = "opencv_frame_{}.png".format(img_counter)
-        cv.imwrite(img_name,frame)
+        image_file = cv.imwrite(img_name,frame)
+        # CNN_Predict(image_file)
         print("{}written!".format(img_name))
         img_counter += 1
     img.release()
-    img.destroyAllWindows()
+    cv.destroyAllWindows()
 
 
